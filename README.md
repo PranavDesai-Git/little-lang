@@ -1,10 +1,10 @@
-# Little-Lang
+# GraphLang
 
-Little-Lang is a minimal, fast, integer-only programming language. At its core, it is an expression evaluator built entirely on a **strict binary tree**, with built-in support for variables, functions, and conditionals.
+GraphLang is a minimal, fast, integer-only programming language. At its core, it is an expression evaluator built entirely on a **strict binary tree**, with built-in support for variables, functions, and conditionals.
 
 ## Syntax Design
 
-Little-Lang uses a clean, modern LL(1) syntax. The parser distinguishes between variables and functions dynamically by using a single token of lookahead:
+GraphLang uses a clean, modern LL(1) syntax. The parser distinguishes between variables and functions dynamically by using a single token of lookahead:
 
 - **Variable Definition:** `def x = 10`
 - **Function Definition:** `def add(a, b) = a + b`
@@ -16,12 +16,12 @@ Because function calls are always followed by parentheses or arguments, the pars
 ## Architecture & Evaluation
 
 ### Strict Binary Tree & Cons Lists
-Everything in Little-Lang is a strict binary tree. Function calls take exactly two arguments (mapped directly to the `left` and `right` AST node pointers). 
+Everything in GraphLang is a strict binary tree. Function calls take exactly two arguments (mapped directly to the `left` and `right` AST node pointers). 
 
-To support arbitrary amounts of data, Little-Lang implements **Lists** using a Lisp-style Cons Cell approach. A list is simply a chain of binary nodes where `left` holds the integer value (the head) and `right` points to the next node in the list (the tail).
+To support arbitrary amounts of data, GraphLang implements **Lists** using a Lisp-style Cons Cell approach. A list is simply a chain of binary nodes where `left` holds the integer value (the head) and `right` points to the next node in the list (the tail).
 
 ### Graph Reduction (Tree Rewriting)
-Unlike traditional interpreters that maintain complex "Scope Stacks" or environments at runtime, Little-Lang evaluates functions using **Graph Reduction**:
+Unlike traditional interpreters that maintain complex "Scope Stacks" or environments at runtime, GraphLang evaluates functions using **Graph Reduction**:
 1. When a function is called, the evaluator grabs the function's AST template from the hashtable.
 2. It clones the tree, physically swaps the placeholder variables for the evaluated `left` and `right` arguments, and **replaces** the function call node with this new tree.
 3. The tree is then evaluated and collapses down into a single `LITERAL` node.

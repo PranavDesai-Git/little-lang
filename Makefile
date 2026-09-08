@@ -10,7 +10,7 @@ INCDIR = include
 # Files
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
-TARGET = $(OBJDIR)/little-lang
+TARGET = $(OBJDIR)/graphLang
 
 .PHONY: all clean run
 
