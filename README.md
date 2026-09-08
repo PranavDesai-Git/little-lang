@@ -1,6 +1,6 @@
 # Little-Lang
 
-Little-Lang is a minimal, fast, integer-only programming language. At its core, it is an expression evaluator built on a binary tree, with built-in support for variables, functions, and conditionals.
+Little-Lang is a minimal, fast, integer-only programming language. At its core, it is an expression evaluator built entirely on a **strict binary tree**, with built-in support for variables, functions, and conditionals.
 
 ## Syntax Design
 
@@ -11,27 +11,31 @@ Little-Lang uses a clean, modern LL(1) syntax. The parser distinguishes between 
 - **Variable Usage:** `x + 5` (Evaluates to 15)
 - **Function Call:** `add(x, 5)`
 
-Because function calls are always followed by parentheses or arguments, the parser can easily differentiate them from variables without needing special prefixes or symbols.
+Because function calls are always followed by parentheses or arguments, the parser can easily differentiate them from variables.
 
-## Architecture & Environment
+## Architecture & Evaluation
+
+### Strict Binary Tree & Cons Lists
+Everything in Little-Lang is a strict binary tree. Function calls take exactly two arguments (mapped directly to the `left` and `right` AST node pointers). 
+
+To support arbitrary amounts of data, Little-Lang implements **Lists** using a Lisp-style Cons Cell approach. A list is simply a chain of binary nodes where `left` holds the integer value (the head) and `right` points to the next node in the list (the tail).
+
+### Graph Reduction (Tree Rewriting)
+Unlike traditional interpreters that maintain complex "Scope Stacks" or environments at runtime, Little-Lang evaluates functions using **Graph Reduction**:
+1. When a function is called, the evaluator grabs the function's AST template from the hashtable.
+2. It clones the tree, physically swaps the placeholder variables for the evaluated `left` and `right` arguments, and **replaces** the function call node with this new tree.
+3. The tree is then evaluated and collapses down into a single `LITERAL` node.
+
+This avoids runtime environment lookups entirely and inherently provides memoization.
 
 ### Data-Driven Environment (Hashtable)
-Little-Lang operates on a Data-Driven Design. All variables, user-defined functions, and built-in operators (`+`, `-`, `*`, `/`) are stored in an $O(1)$ **Hashtable Environment**. 
-The core evaluator does not use hardcoded `switch` statements for math operations. Instead, operators map directly to C function pointers in the hashtable (Dynamic Dispatch), making the language incredibly extensible.
+All variables, user-defined functions, and built-in operators (`+`, `-`, `*`, `/`) are stored in an $O(1)$ **Hashtable Environment**. The parser uses this to map operators directly to C function pointers (Dynamic Dispatch), removing the need for hardcoded `switch` statements.
 
-### AST Node Structure
-The Abstract Syntax Tree (AST) is built using a C Tagged Union. Each node contains:
-- **Types:** `LITERAL`, `IDENTIFIER`, `FUNCTION_CALL`, etc.
-- **Data:** All numerical values are strictly **integers**. No floating point logic or overhead is used.
-- **Function Pointers:** For operations, nodes store a C function pointer fetched from the Hashtable.
-
-### Optimization Flags (Constant Folding & Strength Reduction)
-The parser applies intelligent flags to nodes during AST construction, allowing the evaluator to perform advanced optimizations at runtime without evaluating branches:
-
-- `ZERO`: Short-circuits operations. For example, `heavy_func() * 0` instantly returns `0` without evaluating the left branch.
-- `ONE`: Identity operations. Evaluates `x * 1` or `x / 1` by simply returning `x`.
-- `TWO`: Strength reduction. Multiplication and division by 2 are optimized down to extremely fast bitwise integer shifts (`<< 1` and `>> 1`).
-- `LEFTVAR` / `RIGHTVAR`: Signals the evaluator to treat a branch as a memory location/identifier rather than evaluating its value (vital for assignments).
+### Optimization Flags (Compile-Time Evaluation)
+The parser is aggressive. Pure math expressions without variables are instantly evaluated at parse-time (**Constant Folding**). For runtime execution, nodes use flags:
+- `ZERO`: Short-circuits operations (e.g., `heavy_func() * 0` instantly returns `0` without walking the left branch).
+- `ONE`: Identity operations. Evaluates `x * 1` by returning `x`.
+- `TWO`: Strength reduction. Multiplication/division by 2 are optimized to native bitwise shifts (`<< 1` and `>> 1`).
 
 ## Building & Running
 
