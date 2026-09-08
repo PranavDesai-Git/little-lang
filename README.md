@@ -19,7 +19,7 @@ Because function calls are always followed by parentheses or arguments, the pars
 - **Execution:** GraphLang evaluates source code by reading `.gl` files from top to bottom.
 - **Truthiness:** There is no boolean type. `1` is True and `0` is False. Comparison operators naturally evaluate to `0` or `1`.
 - **Variables:** Variables are completely mutable. Redefining a variable simply overwrites its previous entry in the hashtable.
-- **Errors:** On illegal operations (e.g., dividing by zero or looking up an undefined variable), the evaluator dumps an error trace and safely aborts execution.
+- **Errors & Result Types:** Functions do not segfault on expected errors (like division by zero). Instead, they return the integer `0` tagged with a custom error flag. If a user tries to use an error-flagged node in a math operation without checking it first, the program safely aborts (Strict Error Propagation). Users handle these errors using a built-in `catch_flag` macro which clears the flag and executes a branch.
 
 ## Architecture & Evaluation
 
@@ -34,6 +34,11 @@ Unlike traditional interpreters that maintain complex "Scope Stacks" or environm
 2. It clones the tree, physically swaps the placeholder variables for the evaluated `left` and `right` arguments, and **replaces** the function call node with this new tree.
 3. The tree is then evaluated and collapses down into a single `LITERAL` node.
 
+### Advanced Features (Lazy Evaluation & First-Class Functions)
+Because of the Graph Reduction architecture, GraphLang inherently supports advanced functional programming paradigms:
+- **First-Class Functions:** Functions are just AST trees in a hashtable. A function name can be passed as an argument to another function (e.g., `map(func_name, list)`), which then dynamically grafts that function tree onto the list at runtime.
+- **Lazy/Infinite Lists:** Because GraphLang doesn't evaluate arguments until they are strictly needed, users can define infinite, self-referential lists. The tail of the list is simply an unevaluated branch of the AST.
+
 ### Memory Management (Mark-and-Sweep GC)
 Because Graph Reduction physically overwrites and orphans tree nodes during execution, GraphLang manages memory using a custom **Mark-and-Sweep Garbage Collector**:
 1. **Mark:** The GC pauses execution, walks the Hashtable environment, recursively traverses every active binary tree, and flips a `FLAG_GC_MARKED` bit on each reachable node.
@@ -43,7 +48,7 @@ Because Graph Reduction physically overwrites and orphans tree nodes during exec
 All variables, user-defined functions, and built-in operators (`+`, `-`, `*`, `/`) are stored in an $O(1)$ **Hashtable Environment**. The parser uses this to map operators directly to C function pointers (Dynamic Dispatch), removing the need for hardcoded `switch` statements.
 
 ### Optimization Flags (Compile-Time Evaluation)
-The parser is aggressive. Pure math expressions without variables are instantly evaluated at parse-time (**Constant Folding**). For runtime execution, nodes use a 32-bit `unsigned int` bitmask for flags (leaving over 28 bits open for user-defined decorators/metadata):
+The parser is aggressive. Pure math expressions without variables are instantly evaluated at parse-time (**Constant Folding**). For runtime execution, nodes use a 32-bit `unsigned int` bitmask for flags (leaving over 28 bits open for user-defined decorators, metadata, or explicit error checkers):
 - `ZERO`: Short-circuits operations (e.g., `heavy_func() * 0` instantly returns `0` without walking the left branch).
 - `ONE`: Identity operations. Evaluates `x * 1` by returning `x`.
 - `TWO`: Strength reduction. Multiplication/division by 2 are optimized to native bitwise shifts (`<< 1` and `>> 1`).
