@@ -34,7 +34,10 @@ Unlike traditional interpreters that maintain complex "Scope Stacks" or environm
 2. It clones the tree, physically swaps the placeholder variables for the evaluated `left` and `right` arguments, and **replaces** the function call node with this new tree.
 3. The tree is then evaluated and collapses down into a single `LITERAL` node.
 
-This avoids runtime environment lookups entirely and inherently provides memoization.
+### Memory Management (Mark-and-Sweep GC)
+Because Graph Reduction physically overwrites and orphans tree nodes during execution, GraphLang manages memory using a custom **Mark-and-Sweep Garbage Collector**:
+1. **Mark:** The GC pauses execution, walks the Hashtable environment, recursively traverses every active binary tree, and flips a `FLAG_GC_MARKED` bit on each reachable node.
+2. **Sweep:** The GC iterates through a master pool of all allocated nodes. Any node without the mark bit is safely destroyed, while marked nodes have their bit cleared for the next cycle.
 
 ### Data-Driven Environment (Hashtable)
 All variables, user-defined functions, and built-in operators (`+`, `-`, `*`, `/`) are stored in an $O(1)$ **Hashtable Environment**. The parser uses this to map operators directly to C function pointers (Dynamic Dispatch), removing the need for hardcoded `switch` statements.
