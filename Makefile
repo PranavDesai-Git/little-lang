@@ -30,3 +30,7 @@ clean:
 
 run: all
 	./$(TARGET)
+
+compiledb: clean
+	bear -- make all
+
