@@ -7,5 +7,6 @@ void initAllocator(void);
 void pushFreeList(Node *deadNode);
 Node *popFreeList(void);
 Node *allocNode(void);
+void freeAllChunks(void);
 
 #endif

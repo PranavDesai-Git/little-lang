@@ -68,3 +68,13 @@ Node *allocNode(void) {
 
     return newNode;
 }
+
+void freeAllChunks(void) {
+    Chunk *temp = first;
+    Chunk *freeChunk;
+    while (temp != NULL) {
+        freeChunk = temp;
+        temp = temp->next;
+        free(freeChunk);
+    }
+}
