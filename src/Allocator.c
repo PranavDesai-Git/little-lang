@@ -1,0 +1,70 @@
+#include "TreeNode.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CHUNK_SIZE 1024
+
+typedef struct Chunk {
+    Node nodes[CHUNK_SIZE];
+    struct Chunk *next;
+} Chunk;
+
+Chunk *first = NULL;
+Chunk *current = NULL;
+int top = 0;
+Node *freeListHead = NULL;
+
+Chunk *createChunk(void) {
+    Chunk *newChunk = malloc(sizeof(Chunk));
+    if (newChunk == NULL) {
+        printf("CRITICAL ERROR: OS out of memory!\n");
+        exit(1);
+    }
+    newChunk->next = NULL;
+    return newChunk;
+}
+
+void initAllocator(void) {
+    first = createChunk();
+    current = first;
+    top = 0;
+    freeListHead = NULL;
+}
+
+void pushFreeList(Node *deadNode) {
+    deadNode->left = freeListHead;
+    freeListHead = deadNode;
+}
+
+Node *popFreeList(void) {
+    if (freeListHead == NULL)
+        return NULL;
+    Node *temp = freeListHead;
+    freeListHead = freeListHead->left;
+    return temp;
+}
+
+Node *allocNode(void) {
+    Node *recycled = popFreeList();
+    if (recycled != NULL) {
+        return recycled;
+    }
+    if (current == NULL) {
+        initAllocator();
+    }
+    if (top >= CHUNK_SIZE) {
+        Chunk *newChunk = createChunk();
+        current->next = newChunk;
+        current = newChunk;
+        top = 0;
+    }
+    Node *newNode = &current->nodes[top++];
+
+    newNode->left = NULL;
+    newNode->right = NULL;
+    newNode->infoFlags = 0;
+    newNode->errorFlags = 0;
+    newNode->statusFlags = 0;
+
+    return newNode;
+}
