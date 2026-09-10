@@ -27,7 +27,7 @@ unsigned long hashString(char *str) {
     return hash % SIZE;
 }
 
-void envInsert(EnvEntry *newEntry) {
+void insertEnvEntry(EnvEntry *newEntry) {
     int pos = hashString(newEntry->key);
     if (envTable[pos] != NULL) {
         if (strcmp(envTable[pos]->key, newEntry->key)) {
