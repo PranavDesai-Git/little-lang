@@ -8,5 +8,6 @@ void pushFreeList(Node *deadNode);
 Node *popFreeList(void);
 Node *allocNode(void);
 void freeAllChunks(void);
+void sweep(void);
 
 #endif

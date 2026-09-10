@@ -1,3 +1,4 @@
+#include "GarbageCollector.h"
 #include "TreeNode.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,5 +77,22 @@ void freeAllChunks(void) {
         freeChunk = temp;
         temp = temp->next;
         free(freeChunk);
+    }
+}
+
+void sweep(void) {
+    freeListHead = NULL;
+    Chunk *temp = first;
+    while (temp != NULL) {
+        int limit = (temp == current) ? top : CHUNK_SIZE;
+        for (int i = 0; i < limit; ++i) {
+            Node *tempNode = &temp->nodes[i];
+            if (tempNode->statusFlags & FLAG_GC_MARKD) {
+                tempNode->statusFlags &= ~FLAG_GC_MARKD;
+            } else {
+                pushFreeList(tempNode);
+            }
+        }
+        temp = temp->next;
     }
 }
