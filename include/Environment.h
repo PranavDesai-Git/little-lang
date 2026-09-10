@@ -4,6 +4,8 @@
 #include "TreeNode.h"
 #include <stdint.h>
 
+#define ENV_SIZE 1024
+
 typedef Node *(*Func)(Node *left, Node *right);
 
 typedef struct EnvEntry {
@@ -17,6 +19,8 @@ typedef struct EnvEntry {
 
     struct EnvEntry *next; // in case of collisions
 } EnvEntry;
+
+extern EnvEntry *envTable[ENV_SIZE];
 
 void envInsert(EnvEntry *newEntry);
 EnvEntry *getEnvEntry(char *key);
