@@ -1,5 +1,6 @@
 #include "Environment.h"
 #include <string.h>
+#include <stdlib.h>
 
 EnvEntry *envTable[ENV_SIZE];
 
@@ -47,4 +48,24 @@ EnvEntry *getEnvEntry(char *key) {
         temp = temp->next;
     }
     return NULL;
+}
+
+void defineVariable(char* name, Node* value) {
+    EnvEntry *entry = malloc(sizeof(EnvEntry));
+    entry->key = name;
+    entry->paramName = NULL;
+    entry->isFunc = 0;
+    entry->val.node = value;
+    entry->next = NULL;
+    envInsert(entry);
+}
+
+void defineFunction(char* name, char* paramName, Node* body) {
+    EnvEntry *entry = malloc(sizeof(EnvEntry));
+    entry->key = name;
+    entry->paramName = paramName;
+    entry->isFunc = 2; // User-defined!
+    entry->val.node = body;
+    entry->next = NULL;
+    envInsert(entry);
 }
