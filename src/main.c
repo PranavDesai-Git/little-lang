@@ -6,6 +6,7 @@
 #include "TreeNode.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 int main(void) {
     printf("Starting GraphLang VM...\n");
@@ -13,52 +14,47 @@ int main(void) {
     initAllocator();
     registerAllNatives();
 
-    printf("Building AST for fib(n)...\n");
+    printf("Building AST for sum(n)...\n");
 
-    Node *cond =
-        createFunction(createVariable("<"),
-                       createArgs2(createVariable("n"), createLiteral(2)));
-    Node *trueBranch = createVariable("n");
-
-    // fib(n-1)
-    Node *fib_1 = createFunction(
-        createVariable("fib"),
+    // cond: n < 1
+    Node *cond = createFunction(createVariable("<"), createArgs2(createVariable("n"), createLiteral(1)));
+    
+    // trueBranch: 0
+    Node *trueBranch = createLiteral(0);
+    
+    // falseBranch: n + sum(n - 1)
+    Node *sum_n_minus_1 = createFunction(
+        createVariable("sum"),
         createArgs1(createFunction(
             createVariable("-"),
             createArgs2(createVariable("n"), createLiteral(1)))));
+    Node *falseBranch = createFunction(createVariable("+"), createArgs2(createVariable("n"), sum_n_minus_1));
 
-    // fib(n-2)
-    Node *fib_2 = createFunction(
-        createVariable("fib"),
-        createArgs1(createFunction(
-            createVariable("-"),
-            createArgs2(createVariable("n"), createLiteral(2)))));
+    // if (n < 1) 0 else n + sum(n - 1)
+    Node *sumBody = createFunction(createVariable("if"), createArgs3(cond, trueBranch, falseBranch));
 
-    // fib(n-1) + fib(n-2)
-    Node *falseBranch =
-        createFunction(createVariable("+"), createArgs2(fib_1, fib_2));
-
-    Node *fibBody = createFunction(createVariable("if"),
-                                   createArgs3(cond, trueBranch, falseBranch));
-
-    // Create the parameter list for fib: [n]
+    // Create the parameter list for sum: [n]
     Node *paramsList = createList(0, NULL);
     paramsList->left = createVariable("n");
-    defineFunction("fib", paramsList, fibBody);
+    defineFunction("sum", paramsList, sumBody);
 
-    // Create the argument list for mainCall: [10]
-    Node *mainCall =
-        createFunction(createVariable("fib"), createArgs1(createLiteral(40)));
-
+    // sum(500)
+    Node *mainCall = createFunction(createVariable("sum"), createArgs1(createLiteral(500)));
+    
     defineVariable("main", mainCall);
 
-    printf("Evaluating fib(40). This will spawn thousands of nodes...\n");
+    printf("Evaluating sum(500)... \n");
     enableGC();
+    
+    clock_t start = clock();
     Node *result = evaluate(mainCall);
-    printf("\n=== RESULT: %d ===\n\n", result->data.literal);
+    clock_t end = clock();
+    
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("\n=== RESULT: %d ===\n", result->data.literal);
+    printf("=== TIME: %f seconds ===\n\n", time_spent);
 
-    printf("Running Garbage Collector to clean up the thousands of dead "
-           "trees...\n");
+    printf("Running Final GC Pass...\n");
     markAll();
     sweep();
     printf("GC Complete! Dead nodes successfully recycled.\n");
