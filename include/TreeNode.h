@@ -21,4 +21,9 @@ typedef struct Node {
     unsigned int statusFlags;
 } Node;
 
+Node *createLiteral(int value);
+Node *createVariable(char *varName);
+Node *createFunction(char *funcName, Node *leftChild, Node *rightChild);
+Node *createList(int value, Node *nextNode);
+
 #endif // TREENODE_H

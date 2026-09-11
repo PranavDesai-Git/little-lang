@@ -1,26 +1,33 @@
-typedef enum { LITERAL, VARIABLE, FUNCTION, LIST } NodeType;
+#include "TreeNode.h"
+#include "Allocator.h"
 
-typedef struct Node {
-    struct Node *left;
-    struct Node *right;
-    union {
-        int literal;
-        char *var;
-        char *func;
-        int listLiteral;
-    } data;
-
-    NodeType type;
-    unsigned int infoFlags;
-    unsigned int errorFalgs;
-    unsigned int statusFlags;
-} Node;
-
-/*
 Node *createLiteral(int value) {
-    Node *n = alloc_node();
+    Node *n = allocNode();
     n->type = LITERAL;
     n->data.literal = value;
     return n;
 }
-*/
+
+Node *createVariable(char *varName) {
+    Node *n = allocNode();
+    n->type = VARIABLE;
+    n->data.var = varName;
+    return n;
+}
+
+Node *createFunction(char *funcName, Node *leftChild, Node *rightChild) {
+    Node *n = allocNode();
+    n->type = FUNCTION;
+    n->data.func = funcName;
+    n->left = leftChild;
+    n->right = rightChild;
+    return n;
+}
+
+Node *createList(int value, Node *nextNode) {
+    Node *n = allocNode();
+    n->type = LIST;
+    n->data.listLiteral = value;
+    n->right = nextNode;
+    return n;
+}
