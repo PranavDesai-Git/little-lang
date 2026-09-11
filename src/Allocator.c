@@ -65,7 +65,7 @@ Node *allocNode(void) {
     newNode->right = NULL;
     newNode->infoFlags = 0;
     newNode->errorFlags = 0;
-    newNode->statusFlags = 0;
+    newNode->statusFlags = FLAG_ALLOCATED;
 
     return newNode;
 }
@@ -81,16 +81,21 @@ void freeAllChunks(void) {
 }
 
 void sweep(void) {
+    static int frees = 0;
     freeListHead = NULL;
     Chunk *temp = first;
     while (temp != NULL) {
         int limit = (temp == current) ? top : CHUNK_SIZE;
         for (int i = 0; i < limit; ++i) {
             Node *tempNode = &temp->nodes[i];
-            if (tempNode->statusFlags & FLAG_GC_MARKD) {
-                tempNode->statusFlags &= ~FLAG_GC_MARKD;
-            } else {
-                pushFreeList(tempNode);
+            if (tempNode->statusFlags & FLAG_ALLOCATED) {
+                if (tempNode->statusFlags & FLAG_GC_MARKD) {
+                    tempNode->statusFlags &= ~FLAG_GC_MARKD;
+                } else {
+                    tempNode->statusFlags &= ~FLAG_ALLOCATED;
+                    pushFreeList(tempNode);
+                    printf("%d. Node cleared\n", frees++);
+                }
             }
         }
         temp = temp->next;
