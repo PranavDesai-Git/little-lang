@@ -6,7 +6,7 @@
 void registerNative(char *name, Node *(*funcPtr)(Node *, Node *)) {
     EnvEntry *entry = malloc(sizeof(EnvEntry));
     entry->key = name;
-    entry->paramName = NULL;
+    entry->params = NULL;
     entry->isFunc = 1;
     entry->val.func = funcPtr;
     entry->next = NULL;
