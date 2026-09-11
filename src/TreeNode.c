@@ -1,6 +1,5 @@
 #include "TreeNode.h"
 #include "Allocator.h"
-#include <stdlib.h>
 #include <string.h>
 
 Node *createLiteral(int value) {
