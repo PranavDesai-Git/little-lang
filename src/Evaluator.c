@@ -17,27 +17,36 @@ Node *evaluate(Node *node) {
             printf("Runtime Error: Undefined variable '%s'\n", node->data.var);
             exit(1);
         }
+        if (var->isFunc == 1 || var->isFunc == 2) {
+            return node; // Return the function identifier node as-is!
+        }
         return evaluate(var->val.node);
     }
 
-    case FUNCTION: {
-        EnvEntry *func = getEnvEntry(node->data.func);
+    case FUNCTION: { // This is an APPLICATION node
+        Node *funcNode = evaluate(node->left); // Get the function to run
+        if (funcNode->type != VARIABLE) {
+            printf("Runtime Error: Not a function!\n");
+            exit(1);
+        }
+        
+        EnvEntry *func = getEnvEntry(funcNode->data.var);
         if (func == NULL) {
-            printf("Runtime Error: Undefined function '%s'\n", node->data.func);
+            printf("Runtime Error: Undefined function '%s'\n", funcNode->data.var);
             exit(1);
         }
 
         Node *result;
 
-        if (func->isFunc == 1) {
+        if (func->isFunc == 1) { // Native C Function
             Func eval = func->val.func;
-            result = eval(node->left);
+            result = eval(node->right); // Args are in right
 
-        } else if (func->isFunc == 2) {
+        } else if (func->isFunc == 2) { // User-Defined Function
             Node *bodyClone = copyTree(func->val.node);
             
             Node *currParam = func->params;
-            Node *currArg = node->left; // arguments are passed as a LIST in left branch
+            Node *currArg = node->right; // Args are in right
             
             while (currParam != NULL && currArg != NULL) {
                 if (currParam->left && currParam->left->type == VARIABLE) {

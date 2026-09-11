@@ -15,19 +15,19 @@ int main(void) {
 
     printf("Building AST for fib(n)...\n");
 
-    Node *cond = createFunction("<", createArgs2(createVariable("n"), createLiteral(2)), NULL);
+    Node *cond = createFunction(createVariable("<"), createArgs2(createVariable("n"), createLiteral(2)));
     Node *trueBranch = createVariable("n");
     
     // fib(n-1)
-    Node *fib_1 = createFunction("fib", createArgs1(createFunction("-", createArgs2(createVariable("n"), createLiteral(1)), NULL)), NULL);
+    Node *fib_1 = createFunction(createVariable("fib"), createArgs1(createFunction(createVariable("-"), createArgs2(createVariable("n"), createLiteral(1)))));
 
     // fib(n-2)
-    Node *fib_2 = createFunction("fib", createArgs1(createFunction("-", createArgs2(createVariable("n"), createLiteral(2)), NULL)), NULL);
+    Node *fib_2 = createFunction(createVariable("fib"), createArgs1(createFunction(createVariable("-"), createArgs2(createVariable("n"), createLiteral(2)))));
 
     // fib(n-1) + fib(n-2)
-    Node *falseBranch = createFunction("+", createArgs2(fib_1, fib_2), NULL);
+    Node *falseBranch = createFunction(createVariable("+"), createArgs2(fib_1, fib_2));
 
-    Node *fibBody = createFunction("if", createArgs3(cond, trueBranch, falseBranch), NULL);
+    Node *fibBody = createFunction(createVariable("if"), createArgs3(cond, trueBranch, falseBranch));
 
     // Create the parameter list for fib: [n]
     Node *paramsList = createList(0, NULL);
@@ -35,7 +35,7 @@ int main(void) {
     defineFunction("fib", paramsList, fibBody);
 
     // Create the argument list for mainCall: [10]
-    Node *mainCall = createFunction("fib", createArgs1(createLiteral(10)), NULL);
+    Node *mainCall = createFunction(createVariable("fib"), createArgs1(createLiteral(10)));
     
     defineVariable("main", mainCall);
 

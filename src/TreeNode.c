@@ -16,12 +16,11 @@ Node *createVariable(char *varName) {
     return n;
 }
 
-Node *createFunction(char *funcName, Node *leftChild, Node *rightChild) {
+Node *createFunction(Node *funcExpr, Node *args) {
     Node *n = allocNode();
     n->type = FUNCTION;
-    n->data.func = funcName;
-    n->left = leftChild;
-    n->right = rightChild;
+    n->left = funcExpr;
+    n->right = args;
     return n;
 }
 
@@ -51,7 +50,7 @@ Node *substitute(Node *root, char *paramName, Node *argValue) {
         return NULL;
 
     if (root->type == VARIABLE && strcmp(root->data.var, paramName) == 0) {
-        return copyTree(argValue);
+        return argValue;
     }
 
     root->left = substitute(root->left, paramName, argValue);

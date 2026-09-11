@@ -23,7 +23,7 @@ typedef struct Node {
 
 Node *createLiteral(int value);
 Node *createVariable(char *varName);
-Node *createFunction(char *funcName, Node *leftChild, Node *rightChild);
+Node *createFunction(Node *funcExpr, Node *args);
 Node *createList(int value, Node *nextNode);
 Node *copyTree(Node *root);
 Node *substitute(Node *root, char *paramName, Node *argValue);
