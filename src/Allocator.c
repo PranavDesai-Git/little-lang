@@ -46,20 +46,22 @@ Node *popFreeList(void) {
 }
 
 Node *allocNode(void) {
+    Node *newNode;
     Node *recycled = popFreeList();
     if (recycled != NULL) {
-        return recycled;
+        newNode = recycled;
+    } else {
+        if (current == NULL) {
+            initAllocator();
+        }
+        if (top >= CHUNK_SIZE) {
+            Chunk *newChunk = createChunk();
+            current->next = newChunk;
+            current = newChunk;
+            top = 0;
+        }
+        newNode = &current->nodes[top++];
     }
-    if (current == NULL) {
-        initAllocator();
-    }
-    if (top >= CHUNK_SIZE) {
-        Chunk *newChunk = createChunk();
-        current->next = newChunk;
-        current = newChunk;
-        top = 0;
-    }
-    Node *newNode = &current->nodes[top++];
 
     newNode->left = NULL;
     newNode->right = NULL;
