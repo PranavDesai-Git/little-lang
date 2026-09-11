@@ -10,7 +10,7 @@ typedef Node *(*Func)(Node *left, Node *right);
 
 typedef struct EnvEntry {
     char *key;
-    char *paramName;
+    Node *params;        // A LIST node of VARIABLE nodes
     uint_fast8_t isFunc; // 1 if is func 0 if var
 
     union {
@@ -25,7 +25,7 @@ extern EnvEntry *envTable[ENV_SIZE];
 
 void envInsert(EnvEntry *newEntry);
 EnvEntry *getEnvEntry(char *key);
-void defineVariable(char* name, Node* value);
-void defineFunction(char* name, char* paramName, Node* body);
+void defineVariable(char *name, Node *value);
+void defineFunction(char *name, Node *params, Node *body);
 
 #endif

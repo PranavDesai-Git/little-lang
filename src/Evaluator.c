@@ -35,7 +35,18 @@ Node *evaluate(Node *node) {
 
         } else if (func->isFunc == 2) {
             Node *bodyClone = copyTree(func->val.node);
-            bodyClone = substitute(bodyClone, func->paramName, node->left);
+            
+            Node *currParam = func->params;
+            Node *currArg = node->left; // arguments are passed as a LIST in left branch
+            
+            while (currParam != NULL && currArg != NULL) {
+                if (currParam->left && currParam->left->type == VARIABLE) {
+                    bodyClone = substitute(bodyClone, currParam->left->data.var, currArg->left);
+                }
+                currParam = currParam->right;
+                currArg = currArg->right;
+            }
+            
             result = evaluate(bodyClone);
 
         } else {

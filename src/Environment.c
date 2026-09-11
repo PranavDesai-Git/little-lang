@@ -53,17 +53,17 @@ EnvEntry *getEnvEntry(char *key) {
 void defineVariable(char* name, Node* value) {
     EnvEntry *entry = malloc(sizeof(EnvEntry));
     entry->key = name;
-    entry->paramName = NULL;
+    entry->params = NULL;
     entry->isFunc = 0;
     entry->val.node = value;
     entry->next = NULL;
     envInsert(entry);
 }
 
-void defineFunction(char* name, char* paramName, Node* body) {
+void defineFunction(char* name, Node* params, Node* body) {
     EnvEntry *entry = malloc(sizeof(EnvEntry));
     entry->key = name;
-    entry->paramName = paramName;
+    entry->params = params;
     entry->isFunc = 2; // User-defined!
     entry->val.node = body;
     entry->next = NULL;
