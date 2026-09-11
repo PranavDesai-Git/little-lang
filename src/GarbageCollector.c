@@ -1,7 +1,28 @@
 #include "GarbageCollector.h"
 #include "Environment.h"
 #include "TreeNode.h"
+#include <stdio.h>
 #include <stdlib.h>
+
+int gcEnabled = 0;
+void enableGC(void) { gcEnabled = 1; }
+
+#define MAX_ROOTS 4096
+Node *gcRoots[MAX_ROOTS];
+int rootCount = 0;
+
+void pushRoot(Node *node) {
+    if (rootCount < MAX_ROOTS) {
+        gcRoots[rootCount++] = node;
+    } else {
+        printf("Fatal Error: Shadow Stack Overflow!\n");
+        exit(1);
+    }
+}
+
+void popRoot(void) {
+    if (rootCount > 0) rootCount--;
+}
 
 void markNode(Node *n) {
     if (n == NULL)
@@ -18,6 +39,10 @@ void markNode(Node *n) {
 }
 
 void markAll(void) {
+    for (int i = 0; i < rootCount; i++) {
+        markNode(gcRoots[i]);
+    }
+
     for (int i = 0; i < ENV_SIZE; i++) {
         EnvEntry *temp = envTable[i];
 

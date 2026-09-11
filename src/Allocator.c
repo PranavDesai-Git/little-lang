@@ -5,6 +5,8 @@
 
 #define CHUNK_SIZE 1024
 
+void sweep(void);
+
 typedef struct Chunk {
     Node nodes[CHUNK_SIZE];
     struct Chunk *next;
@@ -48,6 +50,13 @@ Node *popFreeList(void) {
 Node *allocNode(void) {
     Node *newNode;
     Node *recycled = popFreeList();
+    
+    if (recycled == NULL && gcEnabled) {
+        markAll();
+        sweep();
+        recycled = popFreeList();
+    }
+
     if (recycled != NULL) {
         newNode = recycled;
     } else {
@@ -83,7 +92,6 @@ void freeAllChunks(void) {
 }
 
 void sweep(void) {
-    static int frees = 0;
     freeListHead = NULL;
     Chunk *temp = first;
     while (temp != NULL) {
@@ -96,7 +104,6 @@ void sweep(void) {
                 } else {
                     tempNode->statusFlags &= ~FLAG_ALLOCATED;
                     pushFreeList(tempNode);
-                    printf("%d. Node cleared\n", frees++);
                 }
             }
         }

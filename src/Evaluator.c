@@ -1,5 +1,6 @@
 #include "Environment.h"
 #include "TreeNode.h"
+#include "GarbageCollector.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -44,6 +45,7 @@ Node *evaluate(Node *node) {
 
         } else if (func->isFunc == 2) { // User-Defined Function
             Node *bodyClone = copyTree(func->val.node);
+            pushRoot(bodyClone);
             
             Node *currParam = func->params;
             Node *currArg = node->right; // Args are in right
@@ -57,6 +59,7 @@ Node *evaluate(Node *node) {
             }
             
             result = evaluate(bodyClone);
+            popRoot();
 
         } else {
             printf("Runtime Error: '%s' is not a function!\n", func->key);

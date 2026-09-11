@@ -7,5 +7,10 @@
 
 void markNode(Node *n);
 void markAll(void);
+void pushRoot(Node *node);
+void popRoot(void);
+void enableGC(void);
+
+extern int gcEnabled;
 
 #endif

@@ -15,19 +15,31 @@ int main(void) {
 
     printf("Building AST for fib(n)...\n");
 
-    Node *cond = createFunction(createVariable("<"), createArgs2(createVariable("n"), createLiteral(2)));
+    Node *cond =
+        createFunction(createVariable("<"),
+                       createArgs2(createVariable("n"), createLiteral(2)));
     Node *trueBranch = createVariable("n");
-    
+
     // fib(n-1)
-    Node *fib_1 = createFunction(createVariable("fib"), createArgs1(createFunction(createVariable("-"), createArgs2(createVariable("n"), createLiteral(1)))));
+    Node *fib_1 = createFunction(
+        createVariable("fib"),
+        createArgs1(createFunction(
+            createVariable("-"),
+            createArgs2(createVariable("n"), createLiteral(1)))));
 
     // fib(n-2)
-    Node *fib_2 = createFunction(createVariable("fib"), createArgs1(createFunction(createVariable("-"), createArgs2(createVariable("n"), createLiteral(2)))));
+    Node *fib_2 = createFunction(
+        createVariable("fib"),
+        createArgs1(createFunction(
+            createVariable("-"),
+            createArgs2(createVariable("n"), createLiteral(2)))));
 
     // fib(n-1) + fib(n-2)
-    Node *falseBranch = createFunction(createVariable("+"), createArgs2(fib_1, fib_2));
+    Node *falseBranch =
+        createFunction(createVariable("+"), createArgs2(fib_1, fib_2));
 
-    Node *fibBody = createFunction(createVariable("if"), createArgs3(cond, trueBranch, falseBranch));
+    Node *fibBody = createFunction(createVariable("if"),
+                                   createArgs3(cond, trueBranch, falseBranch));
 
     // Create the parameter list for fib: [n]
     Node *paramsList = createList(0, NULL);
@@ -35,15 +47,18 @@ int main(void) {
     defineFunction("fib", paramsList, fibBody);
 
     // Create the argument list for mainCall: [10]
-    Node *mainCall = createFunction(createVariable("fib"), createArgs1(createLiteral(10)));
-    
+    Node *mainCall =
+        createFunction(createVariable("fib"), createArgs1(createLiteral(40)));
+
     defineVariable("main", mainCall);
 
-    printf("Evaluating fib(10). This will spawn thousands of nodes...\n");
+    printf("Evaluating fib(40). This will spawn thousands of nodes...\n");
+    enableGC();
     Node *result = evaluate(mainCall);
     printf("\n=== RESULT: %d ===\n\n", result->data.literal);
 
-    printf("Running Garbage Collector to clean up the thousands of dead trees...\n");
+    printf("Running Garbage Collector to clean up the thousands of dead "
+           "trees...\n");
     markAll();
     sweep();
     printf("GC Complete! Dead nodes successfully recycled.\n");

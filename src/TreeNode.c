@@ -1,5 +1,6 @@
 #include "TreeNode.h"
 #include "Allocator.h"
+#include "GarbageCollector.h"
 #include <string.h>
 
 Node *createLiteral(int value) {
@@ -36,11 +37,13 @@ Node *copyTree(Node *root) {
     if (root == NULL)
         return NULL;
     Node *clone = allocNode();
+    pushRoot(clone);
     clone->type = root->type;
     clone->data = root->data;
 
     clone->left = copyTree(root->left);
     clone->right = copyTree(root->right);
+    popRoot();
 
     return clone;
 }
