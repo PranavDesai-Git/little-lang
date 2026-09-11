@@ -17,14 +17,18 @@ int main(void) {
 
     Node *cond = createFunction("<", createVariable("n"), createLiteral(2));
     Node *trueBranch = createVariable("n");
-    Node *falseBranch = createFunction(
-        "+",
-        createFunction(
-            "fib", createFunction("-", createVariable("n"), createLiteral(1)),
-            NULL),
-        createFunction(
-            "fib", createFunction("-", createVariable("n"), createLiteral(2)),
-            NULL));
+    
+    // fib(n-1)
+    Node *argList1 = createList(0, NULL);
+    argList1->left = createFunction("-", createVariable("n"), createLiteral(1));
+    Node *fib_1 = createFunction("fib", argList1, NULL);
+
+    // fib(n-2)
+    Node *argList2 = createList(0, NULL);
+    argList2->left = createFunction("-", createVariable("n"), createLiteral(2));
+    Node *fib_2 = createFunction("fib", argList2, NULL);
+
+    Node *falseBranch = createFunction("+", fib_1, fib_2);
 
     Node *branches = allocNode();
     branches->type = LIST;
@@ -33,9 +37,16 @@ int main(void) {
 
     Node *fibBody = createFunction("if", cond, branches);
 
-    defineFunction("fib", "n", fibBody);
+    // Create the parameter list for fib: [n]
+    Node *paramsList = createList(0, NULL);
+    paramsList->left = createVariable("n");
+    defineFunction("fib", paramsList, fibBody);
 
-    Node *mainCall = createFunction("fib", createLiteral(10), NULL);
+    // Create the argument list for mainCall: [10]
+    Node *mainArgsList = createList(0, NULL);
+    mainArgsList->left = createLiteral(10);
+    Node *mainCall = createFunction("fib", mainArgsList, NULL);
+    
     defineVariable("main", mainCall);
 
     printf("Evaluating fib(10). This will spawn thousands of nodes...\n");
