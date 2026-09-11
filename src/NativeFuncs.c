@@ -3,7 +3,7 @@
 #include "TreeNode.h"
 #include <stdlib.h>
 
-void registerNative(char *name, Node *(*funcPtr)(Node *, Node *)) {
+void registerNative(char *name, Node *(*funcPtr)(Node *)) {
     EnvEntry *entry = malloc(sizeof(EnvEntry));
     entry->key = name;
     entry->params = NULL;
@@ -13,73 +13,88 @@ void registerNative(char *name, Node *(*funcPtr)(Node *, Node *)) {
     envInsert(entry);
 }
 
-Node *nativeAdd(Node *left, Node *right) {
-    return createLiteral(evaluate(left)->data.literal +
-                         evaluate(right)->data.literal);
-}
-Node *nativeSub(Node *left, Node *right) {
-    return createLiteral(evaluate(left)->data.literal -
-                         evaluate(right)->data.literal);
-}
-Node *nativeMul(Node *left, Node *right) {
-    // TODO: optimize via info flag
-    return createLiteral(evaluate(left)->data.literal *
-                         evaluate(right)->data.literal);
-}
-Node *nativeDiv(Node *left, Node *right) {
-    // TODO: handle div by zero via fatal flag
-    return createLiteral(evaluate(left)->data.literal /
-                         evaluate(right)->data.literal);
+Node *nativeAdd(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
+    return createLiteral(evaluate(left)->data.literal + evaluate(right)->data.literal);
 }
 
-Node *nativeLessThan(Node *left, Node *right) {
+Node *nativeSub(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
+    return createLiteral(evaluate(left)->data.literal - evaluate(right)->data.literal);
+}
+
+Node *nativeMul(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
+    return createLiteral(evaluate(left)->data.literal * evaluate(right)->data.literal);
+}
+
+Node *nativeDiv(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
+    return createLiteral(evaluate(left)->data.literal / evaluate(right)->data.literal);
+}
+
+Node *nativeLessThan(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
     Node *l = evaluate(left);
     Node *r = evaluate(right);
     return createLiteral(l->data.literal < r->data.literal ? 1 : 0);
 }
 
-Node *nativeGreaterThan(Node *left, Node *right) {
+Node *nativeGreaterThan(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
     Node *l = evaluate(left);
     Node *r = evaluate(right);
     return createLiteral(l->data.literal > r->data.literal ? 1 : 0);
 }
 
-Node *nativeEquals(Node *left, Node *right) {
+Node *nativeEquals(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
     Node *l = evaluate(left);
     Node *r = evaluate(right);
     return createLiteral(l->data.literal == r->data.literal ? 1 : 0);
 }
 
-Node *nativeAnd(Node *left, Node *right) {
+Node *nativeAnd(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
     Node *l = evaluate(left);
-    if (l->data.literal == 0)
-        return createLiteral(0);
-
+    if (l->data.literal == 0) return createLiteral(0);
     Node *r = evaluate(right);
     return createLiteral(r->data.literal != 0 ? 1 : 0);
 }
 
-Node *nativeOr(Node *left, Node *right) {
+Node *nativeOr(Node *args) {
+    Node *left = args->left;
+    Node *right = args->right->left;
     Node *l = evaluate(left);
-    if (l->data.literal != 0)
-        return createLiteral(1);
-
+    if (l->data.literal != 0) return createLiteral(1);
     Node *r = evaluate(right);
     return createLiteral(r->data.literal != 0 ? 1 : 0);
 }
 
-Node *nativeNot(Node *left, Node *right) {
-    (void)right; // unused
+Node *nativeNot(Node *args) {
+    Node *left = args->left;
     Node *l = evaluate(left);
     return createLiteral(l->data.literal == 0 ? 1 : 0);
 }
 
-Node *nativeIf(Node *condition, Node *branches) {
+Node *nativeIf(Node *args) {
+    Node *condition = args->left;
+    Node *trueBranch = args->right->left;
+    Node *falseBranch = args->right->right->left;
+    
     Node *cond = evaluate(condition);
     if (cond->data.literal == 1) {
-        return evaluate(branches->left);
+        return evaluate(trueBranch);
     } else {
-        return evaluate(branches->right);
+        return evaluate(falseBranch);
     }
 }
 

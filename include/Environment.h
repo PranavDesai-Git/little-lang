@@ -6,7 +6,7 @@
 
 #define ENV_SIZE 1024
 
-typedef Node *(*Func)(Node *left, Node *right);
+typedef Node *(*Func)(Node *args);
 
 typedef struct EnvEntry {
     char *key;

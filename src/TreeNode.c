@@ -59,3 +59,27 @@ Node *substitute(Node *root, char *paramName, Node *argValue) {
 
     return root;
 }
+
+Node *createArgs1(Node *arg1) {
+    Node *l1 = createList(0, NULL);
+    l1->left = arg1;
+    return l1;
+}
+
+Node *createArgs2(Node *arg1, Node *arg2) {
+    Node *l2 = createList(0, NULL);
+    l2->left = arg2;
+    Node *l1 = createList(0, l2);
+    l1->left = arg1;
+    return l1;
+}
+
+Node *createArgs3(Node *arg1, Node *arg2, Node *arg3) {
+    Node *l3 = createList(0, NULL);
+    l3->left = arg3;
+    Node *l2 = createList(0, l3);
+    l2->left = arg2;
+    Node *l1 = createList(0, l2);
+    l1->left = arg1;
+    return l1;
+}

@@ -31,7 +31,7 @@ Node *evaluate(Node *node) {
 
         if (func->isFunc == 1) {
             Func eval = func->val.func;
-            result = eval(node->left, node->right);
+            result = eval(node->left);
 
         } else if (func->isFunc == 2) {
             Node *bodyClone = copyTree(func->val.node);
@@ -54,10 +54,10 @@ Node *evaluate(Node *node) {
             exit(1);
         }
 
-        node->type = LITERAL;
+        node->type = result->type;
         node->data = result->data;
-        node->left = NULL;
-        node->right = NULL;
+        node->left = result->left;
+        node->right = result->right;
 
         return node;
     }

@@ -2,19 +2,19 @@
 #define NATIVEFUNCS_H
 #include "TreeNode.h"
 
-Node *nativeAdd(Node *left, Node *right);
-Node *nativeSub(Node *left, Node *right);
-Node *nativeMul(Node *left, Node *right);
-Node *nativeDiv(Node *left, Node *right);
-Node *nativeIf(Node *condition, Node *branches);
-Node *nativeLessThan(Node *left, Node *right);
-Node *nativeGreaterThan(Node *left, Node *right);
-Node *nativeEquals(Node *left, Node *right);
-Node *nativeAnd(Node *left, Node *right);
-Node *nativeOr(Node *left, Node *right);
-Node *nativeNot(Node *left, Node *right);
+Node *nativeAdd(Node *args);
+Node *nativeSub(Node *args);
+Node *nativeMul(Node *args);
+Node *nativeDiv(Node *args);
+Node *nativeIf(Node *args);
+Node *nativeLessThan(Node *args);
+Node *nativeGreaterThan(Node *args);
+Node *nativeEquals(Node *args);
+Node *nativeAnd(Node *args);
+Node *nativeOr(Node *args);
+Node *nativeNot(Node *args);
 
-void registerNative(char *name, Node *(*funcPtr)(Node *, Node *));
+void registerNative(char *name, Node *(*funcPtr)(Node *));
 void registerAllNatives(void);
 
 #endif

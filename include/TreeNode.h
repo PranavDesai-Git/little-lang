@@ -27,4 +27,7 @@ Node *createFunction(char *funcName, Node *leftChild, Node *rightChild);
 Node *createList(int value, Node *nextNode);
 Node *copyTree(Node *root);
 Node *substitute(Node *root, char *paramName, Node *argValue);
+Node *createArgs1(Node *arg1);
+Node *createArgs2(Node *arg1, Node *arg2);
+Node *createArgs3(Node *arg1, Node *arg2, Node *arg3);
 #endif // TREENODE_H

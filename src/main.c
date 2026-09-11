@@ -15,27 +15,19 @@ int main(void) {
 
     printf("Building AST for fib(n)...\n");
 
-    Node *cond = createFunction("<", createVariable("n"), createLiteral(2));
+    Node *cond = createFunction("<", createArgs2(createVariable("n"), createLiteral(2)), NULL);
     Node *trueBranch = createVariable("n");
     
     // fib(n-1)
-    Node *argList1 = createList(0, NULL);
-    argList1->left = createFunction("-", createVariable("n"), createLiteral(1));
-    Node *fib_1 = createFunction("fib", argList1, NULL);
+    Node *fib_1 = createFunction("fib", createArgs1(createFunction("-", createArgs2(createVariable("n"), createLiteral(1)), NULL)), NULL);
 
     // fib(n-2)
-    Node *argList2 = createList(0, NULL);
-    argList2->left = createFunction("-", createVariable("n"), createLiteral(2));
-    Node *fib_2 = createFunction("fib", argList2, NULL);
+    Node *fib_2 = createFunction("fib", createArgs1(createFunction("-", createArgs2(createVariable("n"), createLiteral(2)), NULL)), NULL);
 
-    Node *falseBranch = createFunction("+", fib_1, fib_2);
+    // fib(n-1) + fib(n-2)
+    Node *falseBranch = createFunction("+", createArgs2(fib_1, fib_2), NULL);
 
-    Node *branches = allocNode();
-    branches->type = LIST;
-    branches->left = trueBranch;
-    branches->right = falseBranch;
-
-    Node *fibBody = createFunction("if", cond, branches);
+    Node *fibBody = createFunction("if", createArgs3(cond, trueBranch, falseBranch), NULL);
 
     // Create the parameter list for fib: [n]
     Node *paramsList = createList(0, NULL);
@@ -43,9 +35,7 @@ int main(void) {
     defineFunction("fib", paramsList, fibBody);
 
     // Create the argument list for mainCall: [10]
-    Node *mainArgsList = createList(0, NULL);
-    mainArgsList->left = createLiteral(10);
-    Node *mainCall = createFunction("fib", mainArgsList, NULL);
+    Node *mainCall = createFunction("fib", createArgs1(createLiteral(10)), NULL);
     
     defineVariable("main", mainCall);
 
@@ -53,8 +43,7 @@ int main(void) {
     Node *result = evaluate(mainCall);
     printf("\n=== RESULT: %d ===\n\n", result->data.literal);
 
-    printf("Running Garbage Collector to clean up the thousands of dead "
-           "trees...\n");
+    printf("Running Garbage Collector to clean up the thousands of dead trees...\n");
     markAll();
     sweep();
     printf("GC Complete! Dead nodes successfully recycled.\n");
