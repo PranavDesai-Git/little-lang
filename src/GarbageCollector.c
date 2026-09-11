@@ -1,8 +1,7 @@
+#include "GarbageCollector.h"
 #include "Environment.h"
 #include "TreeNode.h"
 #include <stdlib.h>
-
-#define FLAG_GC_MARKD 1
 
 void markNode(Node *n) {
     if (n == NULL)
@@ -25,6 +24,9 @@ void markAll(void) {
         while (temp != NULL) {
             if (temp->isFunc == 0 && temp->val.node != NULL) {
                 markNode(temp->val.node);
+            } else if (temp->isFunc == 2) {
+                markNode(temp->val.node);
+                markNode(temp->params);
             }
             temp = temp->next;
         }
