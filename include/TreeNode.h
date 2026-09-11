@@ -25,5 +25,6 @@ Node *createLiteral(int value);
 Node *createVariable(char *varName);
 Node *createFunction(char *funcName, Node *leftChild, Node *rightChild);
 Node *createList(int value, Node *nextNode);
-
+Node *copyTree(Node *root);
+Node *substitute(Node *root, char *paramName, Node *argValue);
 #endif // TREENODE_H

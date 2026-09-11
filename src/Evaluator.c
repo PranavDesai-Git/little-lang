@@ -27,8 +27,21 @@ Node *evaluate(Node *node) {
             exit(1);
         }
 
-        Func eval = func->val.func;
-        Node *result = eval(node->left, node->right);
+        Node *result;
+
+        if (func->isFunc == 1) {
+            Func eval = func->val.func;
+            result = eval(node->left, node->right);
+
+        } else if (func->isFunc == 2) {
+            Node *bodyClone = copyTree(func->val.node);
+            bodyClone = substitute(bodyClone, func->paramName, node->left);
+            result = evaluate(bodyClone);
+
+        } else {
+            printf("Runtime Error: '%s' is not a function!\n", func->key);
+            exit(1);
+        }
 
         node->type = LITERAL;
         node->data = result->data;

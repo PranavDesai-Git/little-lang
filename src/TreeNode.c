@@ -1,5 +1,7 @@
 #include "TreeNode.h"
 #include "Allocator.h"
+#include <stdlib.h>
+#include <string.h>
 
 Node *createLiteral(int value) {
     Node *n = allocNode();
@@ -30,4 +32,31 @@ Node *createList(int value, Node *nextNode) {
     n->data.listLiteral = value;
     n->right = nextNode;
     return n;
+}
+
+Node *copyTree(Node *root) {
+    if (root == NULL)
+        return NULL;
+    Node *clone = allocNode();
+    clone->type = root->type;
+    clone->data = root->data;
+
+    clone->left = copyTree(root->left);
+    clone->right = copyTree(root->right);
+
+    return clone;
+}
+
+Node *substitute(Node *root, char *paramName, Node *argValue) {
+    if (root == NULL)
+        return NULL;
+
+    if (root->type == VARIABLE && strcmp(root->data.var, paramName) == 0) {
+        return copyTree(argValue);
+    }
+
+    root->left = substitute(root->left, paramName, argValue);
+    root->right = substitute(root->right, paramName, argValue);
+
+    return root;
 }
