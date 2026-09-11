@@ -28,7 +28,7 @@ Node *evaluate(Node *node) {
         }
 
         Func eval = func->val.func;
-        Node *result = eval(evaluate(node->left), evaluate(node->right));
+        Node *result = eval(node->left, node->right);
 
         node->type = LITERAL;
         node->data = result->data;
