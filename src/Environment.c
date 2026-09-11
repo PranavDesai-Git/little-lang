@@ -25,6 +25,8 @@ void envInsert(EnvEntry *newEntry) {
         if (strcmp(temp->key, newEntry->key) == 0) {
             temp->val = newEntry->val;
             temp->isFunc = newEntry->isFunc;
+            temp->params = newEntry->params;
+            free(newEntry);
             return;
         }
 
