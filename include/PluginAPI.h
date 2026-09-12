@@ -13,6 +13,8 @@ typedef struct {
     Node *(*createFunction)(Node *funcExpr, Node *args);
     Node *(*createList)(int value, Node *nextNode);
     Node *(*copyTree)(Node *root);
+    void (*pushRoot)(Node *node);
+    void (*popRoot)(void);
 } VMAPI;
 
 #endif

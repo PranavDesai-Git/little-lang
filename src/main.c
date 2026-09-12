@@ -35,6 +35,8 @@ int main(void) {
                  .createLiteral = createLiteral,
                  .createVariable = createVariable,
                  .createFunction = createFunction,
+                 .pushRoot = pushRoot,
+                 .popRoot = popRoot,
                  .createList = createList,
                  .copyTree = copyTree};
     // hardcoded for now
@@ -44,41 +46,45 @@ int main(void) {
 
     initAllocator();
 
-    printf("Building AST for sum(n)...\n");
-
-    // cond: n < 1
+    // condition: n < 2
     Node *cond =
         createFunction(createVariable("<"),
-                       createArgs2(createVariable("n"), createLiteral(1)));
+                       createArgs2(createVariable("n"), createLiteral(2)));
 
-    // trueBranch: 0
-    Node *trueBranch = createLiteral(0);
+    // true branch: n
+    Node *trueBranch = createVariable("n");
 
-    // falseBranch: n + sum(n - 1)
-    Node *sum_n_minus_1 = createFunction(
-        createVariable("sum"),
+    // false branch: fib(n-1) + fib(n-2)
+    Node *fib_n_minus_1 = createFunction(
+        createVariable("fib"),
         createArgs1(createFunction(
             createVariable("-"),
             createArgs2(createVariable("n"), createLiteral(1)))));
-    Node *falseBranch = createFunction(
-        createVariable("+"), createArgs2(createVariable("n"), sum_n_minus_1));
+            
+    Node *fib_n_minus_2 = createFunction(
+        createVariable("fib"),
+        createArgs1(createFunction(
+            createVariable("-"),
+            createArgs2(createVariable("n"), createLiteral(2)))));
 
-    // ? (cond) 0 else n + sum(n - 1)
-    Node *sumBody = createFunction(createVariable("?"),
+    Node *falseBranch = createFunction(
+        createVariable("+"), createArgs2(fib_n_minus_1, fib_n_minus_2));
+
+    Node *fibBody = createFunction(createVariable("?"),
                                    createArgs3(cond, trueBranch, falseBranch));
 
-    // Create the parameter list for sum: [n]
     Node *paramsList = createList(0, NULL);
     paramsList->left = createVariable("n");
-    defineFunction("sum", paramsList, sumBody);
+    defineFunction("fib", paramsList, fibBody);
 
-    // sum(500)
+    // fib(25)
     Node *mainCall =
-        createFunction(createVariable("sum"), createArgs1(createLiteral(500)));
+        createFunction(createVariable("fib"), createArgs1(createLiteral(25)));
 
     defineVariable("main", mainCall);
 
-    printf("Evaluating sum(500)... \n");
+    printf("Building AST for fib(n)...\n");
+    printf("Evaluating fib(25)... \n\n");
     enableGC();
 
     clock_t start = clock();
