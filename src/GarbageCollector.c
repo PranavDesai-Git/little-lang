@@ -7,7 +7,7 @@
 int gcEnabled = 0;
 void enableGC(void) { gcEnabled = 1; }
 
-#define MAX_ROOTS 4096
+#define MAX_ROOTS 65536
 Node *gcRoots[MAX_ROOTS];
 int rootCount = 0;
 
