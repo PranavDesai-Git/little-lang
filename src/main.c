@@ -16,7 +16,8 @@ void loadPlugin(const char *path, VMAPI api) {
         return;
     }
     dlerror();
-    void (*initPlugin)(VMAPI) = dlsym(handle, "initPlugin");
+    void (*initPlugin)(VMAPI);
+    *(void **)(&initPlugin) = dlsym(handle, "initPlugin");
     const char *err = dlerror();
     if (err != NULL) {
         printf("FFI Error: Could not find 'initPlugin' inside '%s'\nReason: %s\n", path, err);
