@@ -35,35 +35,27 @@ Because function calls are always followed by parentheses or arguments, the pars
 
 ## Architecture & Evaluation
 
-### Strict Binary Tree & Cons Lists
-Everything in GraphLang is a strict binary tree. Function calls take exactly two arguments (mapped directly to the `left` and `right` AST node pointers). 
+### The Microkernel Architecture
+GraphLang is designed as an extensible **Microkernel Interpreter**. The core VM is completely agnostic to data types or operations. It simply provides:
+1. A Memory Allocator and Garbage Collector.
+2. A generic AST `Node` structure.
+3. A `PluginAPI` that allows dynamic shared libraries (`.so` files) to register custom evaluation rules.
 
-To support arbitrary amounts of data, GraphLang implements **Lists** using a Lisp-style Cons Cell approach. A list is simply a chain of binary nodes where `left` holds the integer value (the head) and `right` points to the next node in the list (the tail).
+Built-in operations (like math) are loaded at runtime via the `CoreMath.so` plugin. This means users can completely redefine the semantics of the language by swapping out plugins.
 
-### Graph Reduction (Tree Rewriting)
-Unlike traditional interpreters that maintain complex "Scope Stacks" or environments at runtime, GraphLang evaluates functions using **Graph Reduction**:
-1. When a function is called, the evaluator grabs the function's AST template from the hashtable.
-2. It clones the tree, physically swaps the placeholder variables for the evaluated `left` and `right` arguments, and **replaces** the function call node with this new tree.
-3. The tree is then evaluated and collapses down into a single `LITERAL` node.
+### Strict Binary Tree
+Everything in GraphLang is a strict binary tree. Function calls take exactly two arguments (mapped directly to the `left` and `right` AST node pointers), and arbitrary argument lists are constructed using standard Cons cells (`LIST` nodes).
 
-### Advanced Features (Lazy Evaluation & First-Class Functions)
-Because of the Graph Reduction architecture, GraphLang inherently supports advanced functional programming paradigms:
-- **First-Class Functions:** Functions are just AST trees in a hashtable. A function name can be passed as an argument to another function (e.g., `map(func_name, list)`), which then dynamically grafts that function tree onto the list at runtime.
-- **Lazy/Infinite Lists:** Because GraphLang doesn't evaluate arguments until they are strictly needed, users can define infinite, self-referential lists. The tail of the list is simply an unevaluated branch of the AST.
+### Lexical Scoping & Environments
+Instead of relying on a global hashtable or tree rewriting (which is slow and destroys function blueprints), GraphLang evaluates variables using **Lexical Scoping**. 
+When a user-defined function is called, the VM creates a new `LocalEnv` binding on the C stack (which will soon be moved to the GC heap to support true Closures) and links it to the parent environment.
+
+### Strict Evaluation (Call-by-Value)
+GraphLang uses strict **Call-by-Value** evaluation. Arguments passed to functions are fully evaluated in the caller's environment before being bound to the new scope. This prevents infinite loops (the Funarg problem) and ensures predictable execution speed.
 
 ### Memory Management (Mark-and-Sweep GC)
-Because Graph Reduction physically overwrites and orphans tree nodes during execution, GraphLang manages memory using a custom **Mark-and-Sweep Garbage Collector**:
-1. **Mark:** The GC pauses execution, walks the Hashtable environment, recursively traverses every active binary tree, and flips a `FLAG_GC_MARKED` bit on each reachable node.
-2. **Sweep:** The GC iterates through a master pool of all allocated nodes. Any node without the mark bit is safely destroyed, while marked nodes have their bit cleared for the next cycle.
-
-### Data-Driven Environment (Hashtable)
-All variables, user-defined functions, and built-in operators (`+`, `-`, `*`, `/`) are stored in an $O(1)$ **Hashtable Environment**. The parser uses this to map operators directly to C function pointers (Dynamic Dispatch), removing the need for hardcoded `switch` statements.
-
-### Optimization Flags (Compile-Time Evaluation)
-The parser is aggressive. Pure math expressions without variables are instantly evaluated at parse-time (**Constant Folding**). For runtime execution, nodes use a 32-bit `unsigned int` bitmask for flags (leaving over 28 bits open for user-defined decorators, metadata, or explicit error checkers):
-- `ZERO`: Short-circuits operations (e.g., `heavy_func() * 0` instantly returns `0` without walking the left branch).
-- `ONE`: Identity operations. Evaluates `x * 1` by returning `x`.
-- `TWO`: Strength reduction. Multiplication/division by 2 are optimized to native bitwise shifts (`<< 1` and `>> 1`).
+Because the AST creates many intermediate nodes during evaluation, GraphLang manages memory using a custom **Mark-and-Sweep Garbage Collector**. 
+During evaluation, the VM pushes temporary C-stack variables to the GC's "Shadow Stack" (`pushRoot`) to protect them from being swept. The GC walks all active roots, marks reachable nodes, and reclaims dead nodes safely. (A Cheney Copying GC is planned for future optimization).
 
 ## Building & Running
 
