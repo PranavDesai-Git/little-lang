@@ -52,6 +52,14 @@ EnvEntry *getEnvEntry(char *key) {
     return NULL;
 }
 
+void registerNative(char *name, Func cFunc) {
+    EnvEntry *entry = malloc(sizeof(EnvEntry));
+    entry->key = name;
+    entry->isFunc = 1;
+    entry->val.func = cFunc;
+    envInsert(entry);
+}
+
 void defineVariable(char* name, Node* value) {
     EnvEntry *entry = malloc(sizeof(EnvEntry));
     entry->key = name;

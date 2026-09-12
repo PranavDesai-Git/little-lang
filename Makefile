@@ -11,13 +11,19 @@ INCDIR = include
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
 TARGET = $(OBJDIR)/graphLang
+PLUGIN = $(OBJDIR)/CoreMath.so
 
-.PHONY: all clean run
+.PHONY: all clean run plugin
 
-all: $(TARGET)
+all: $(TARGET) plugin
+
+plugin: $(PLUGIN)
+
+$(PLUGIN): plugins/CoreMath.c | $(OBJDIR)
+	$(CC) -shared -fPIC -Iinclude $< -o $@
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ -ldl
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -2,18 +2,46 @@
 #include "Environment.h"
 #include "Evaluator.h"
 #include "GarbageCollector.h"
-#include "NativeFuncs.h"
+#include "PluginAPI.h"
 #include "TreeNode.h"
 #include <stdio.h>
 #include <time.h>
+#include <dlfcn.h>
+#include <string.h>
+
+void loadPlugin(const char *path, VMAPI api) {
+    void *handle = dlopen(path, RTLD_LAZY);
+    if (!handle) {
+        printf("FFI Error: Failed to load plugin '%s'\nReason: %s\n", path, dlerror());
+        return;
+    }
+    dlerror();
+    void (*initPlugin)(VMAPI) = dlsym(handle, "initPlugin");
+    const char *err = dlerror();
+    if (err != NULL) {
+        printf("FFI Error: Could not find 'initPlugin' inside '%s'\nReason: %s\n", path, err);
+        dlclose(handle);
+        return;
+    }
+    initPlugin(api);
+    printf("Successfully loaded plugin: %s\n", path);
+}
 
 int main(void) {
     // TEST PROGRAM ADDS SHIT
+    VMAPI api = {.registerNative = registerNative,
+                 .evaluate = evaluate,
+                 .createLiteral = createLiteral,
+                 .createVariable = createVariable,
+                 .createFunction = createFunction,
+                 .createList = createList,
+                 .copyTree = copyTree};
+    // hardcoded for now
+    loadPlugin("./out/CoreMath.so", api);
 
     printf("Starting GraphLang VM...\n");
 
     initAllocator();
-    registerAllNatives();
 
     printf("Building AST for sum(n)...\n");
 
@@ -34,8 +62,8 @@ int main(void) {
     Node *falseBranch = createFunction(
         createVariable("+"), createArgs2(createVariable("n"), sum_n_minus_1));
 
-    // if (n < 1) 0 else n + sum(n - 1)
-    Node *sumBody = createFunction(createVariable("if"),
+    // ? (cond) 0 else n + sum(n - 1)
+    Node *sumBody = createFunction(createVariable("?"),
                                    createArgs3(cond, trueBranch, falseBranch));
 
     // Create the parameter list for sum: [n]

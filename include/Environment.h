@@ -23,9 +23,10 @@ typedef struct EnvEntry {
 
 extern EnvEntry *envTable[ENV_SIZE];
 
-void envInsert(EnvEntry *newEntry);
+void envInsert(EnvEntry *entry);
 EnvEntry *getEnvEntry(char *key);
-void defineVariable(char *name, Node *value);
+void defineVariable(char *name, Node *val);
 void defineFunction(char *name, Node *params, Node *body);
+void registerNative(char *name, Func cFunc);
 
 #endif
