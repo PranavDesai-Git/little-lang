@@ -6,7 +6,14 @@
 
 #define ENV_SIZE 1024
 
-typedef Node *(*Func)(Node *args);
+struct LocalEnv;
+typedef Node *(*Func)(Node *args, struct LocalEnv *env);
+
+typedef struct LocalEnv {
+    char *varName;
+    struct Node *value;
+    struct LocalEnv *next;
+} LocalEnv;
 
 typedef struct EnvEntry {
     char *key;

@@ -3,9 +3,11 @@
 
 #include "TreeNode.h"
 
+struct LocalEnv;
+
 typedef struct {
-    void (*registerNative)(char *name, Node *(*func)(Node *args));
-    Node *(*evaluate)(Node *node);
+    void (*registerNative)(char *name, Node *(*func)(Node *args, struct LocalEnv *env));
+    Node *(*evaluate)(Node *node, struct LocalEnv *env);
     Node *(*createLiteral)(int value);
     Node *(*createVariable)(char *varName);
     Node *(*createFunction)(Node *funcExpr, Node *args);

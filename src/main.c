@@ -82,7 +82,7 @@ int main(void) {
     enableGC();
 
     clock_t start = clock();
-    Node *result = evaluate(mainCall);
+    Node *result = evaluate(mainCall, NULL);
     clock_t end = clock();
 
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
