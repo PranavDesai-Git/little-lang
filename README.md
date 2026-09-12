@@ -8,6 +8,7 @@ An experimental, blazing fast purely functional Graph Reduction Virtual Machine 
 - [ ] Implement Cheney's Copying GC (O(1) Allocation & Zero-pause Sweeps)
 - [ ] Implement the Accumulator Pattern (Tail Recursion)
 - [ ] Add Tail Call Optimization (TCO) with a Trampoline
+- [ ] Support Custom Datatypes (Plugin-defined ADTs & Userdata)
 - [ ] Build IO Monads for Side Effects
 - [ ] Create a Frontend Lexer & Parser
 
