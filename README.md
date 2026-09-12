@@ -1,5 +1,10 @@
 # GraphLang
 
+An experimental, blazing fast purely functional Graph Reduction Virtual Machine written in C.
+
+## Roadmap & Upcoming Features
+Check out the [TODO.md](TODO.md) for a list of upcoming architectural milestones!
+
 GraphLang is a minimal, fast, integer-only programming language. At its core, it is an expression evaluator built entirely on a **strict binary tree**, with built-in support for variables, functions, and conditionals.
 
 ## Syntax Design

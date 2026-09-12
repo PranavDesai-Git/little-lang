@@ -4,15 +4,16 @@
 #include "GarbageCollector.h"
 #include "PluginAPI.h"
 #include "TreeNode.h"
-#include <stdio.h>
-#include <time.h>
 #include <dlfcn.h>
+#include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 void loadPlugin(const char *path, VMAPI api) {
     void *handle = dlopen(path, RTLD_LAZY);
     if (!handle) {
-        printf("FFI Error: Failed to load plugin '%s'\nReason: %s\n", path, dlerror());
+        printf("FFI Error: Failed to load plugin '%s'\nReason: %s\n", path,
+               dlerror());
         return;
     }
     dlerror();
@@ -20,7 +21,9 @@ void loadPlugin(const char *path, VMAPI api) {
     *(void **)(&initPlugin) = dlsym(handle, "initPlugin");
     const char *err = dlerror();
     if (err != NULL) {
-        printf("FFI Error: Could not find 'initPlugin' inside '%s'\nReason: %s\n", path, err);
+        printf(
+            "FFI Error: Could not find 'initPlugin' inside '%s'\nReason: %s\n",
+            path, err);
         dlclose(handle);
         return;
     }
@@ -60,7 +63,7 @@ int main(void) {
         createArgs1(createFunction(
             createVariable("-"),
             createArgs2(createVariable("n"), createLiteral(1)))));
-            
+
     Node *fib_n_minus_2 = createFunction(
         createVariable("fib"),
         createArgs1(createFunction(
@@ -79,12 +82,12 @@ int main(void) {
 
     // fib(25)
     Node *mainCall =
-        createFunction(createVariable("fib"), createArgs1(createLiteral(25)));
+        createFunction(createVariable("fib"), createArgs1(createLiteral(40)));
 
     defineVariable("main", mainCall);
 
     printf("Building AST for fib(n)...\n");
-    printf("Evaluating fib(25)... \n\n");
+    printf("Evaluating fib(40)... \n\n");
     enableGC();
 
     clock_t start = clock();
