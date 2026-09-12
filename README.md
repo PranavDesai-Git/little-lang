@@ -5,6 +5,7 @@ An experimental, blazing fast purely functional Graph Reduction Virtual Machine 
 ## Roadmap & Upcoming Features
 
 - [ ] Move Environments to the GC Heap (AST Nodes for true Closures)
+- [ ] Implement Cheney's Copying GC (O(1) Allocation & Zero-pause Sweeps)
 - [ ] Implement the Accumulator Pattern (Tail Recursion)
 - [ ] Add Tail Call Optimization (TCO) with a Trampoline
 - [ ] Build IO Monads for Side Effects
